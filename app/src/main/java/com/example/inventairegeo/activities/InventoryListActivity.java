@@ -15,14 +15,16 @@ import com.example.inventairegeo.database.DatabaseHelper;
 import com.example.inventairegeo.models.InventoryItem;
 import java.util.List;
 
+// Cette classe affiche la liste des articles de l'inventaire
 public class InventoryListActivity extends AppCompatActivity {
+    // Déclaration des éléments de l'interface utilisateur
     private RecyclerView recyclerView;
     private InventoryAdapter adapter;
     private DatabaseHelper dbHelper;
     private TextView tvEmpty;
 
+    // Code de requête pour l'édition d'un article
     private static final int EDIT_ITEM_REQUEST = 100;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +32,15 @@ public class InventoryListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_inventory_list);
 
         try {
+            // Initialisation de la base de données et des éléments UI
             dbHelper = new DatabaseHelper(this);
             recyclerView = findViewById(R.id.recycler_view);
             tvEmpty = findViewById(R.id.tv_empty);
 
+            // Configuration du RecyclerView
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+            // Chargement initial des articles
             loadInventoryItems();
 
         } catch (Exception e) {
@@ -44,6 +49,7 @@ public class InventoryListActivity extends AppCompatActivity {
         }
     }
 
+    // Charge tous les articles depuis la base de données
     private void loadInventoryItems() {
         try {
             List<InventoryItem> items = dbHelper.getAllItems();
@@ -53,16 +59,20 @@ public class InventoryListActivity extends AppCompatActivity {
         }
     }
 
+    // Méthode publique pour vérifier l'état vide
     public void checkEmptyState() {
         List<InventoryItem> items = dbHelper.getAllItems();
         checkEmptyState(items);
     }
 
+    // Gère l'affichage selon que la liste est vide ou non
     private void checkEmptyState(List<InventoryItem> items) {
         if (items.isEmpty()) {
+            // Si la liste est vide, affiche le message
             recyclerView.setVisibility(View.GONE);
             tvEmpty.setVisibility(View.VISIBLE);
         } else {
+            // Si la liste contient des éléments, affiche le RecyclerView
             recyclerView.setVisibility(View.VISIBLE);
             tvEmpty.setVisibility(View.GONE);
             adapter = new InventoryAdapter(this, items);
@@ -70,11 +80,12 @@ public class InventoryListActivity extends AppCompatActivity {
         }
     }
 
+    // Gère le retour après édition d'un article
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == EDIT_ITEM_REQUEST && resultCode == RESULT_OK) {
-            // Recharger la liste après une modification
+            // Recharge la liste après une modification
             loadInventoryItems();
         }
     }
