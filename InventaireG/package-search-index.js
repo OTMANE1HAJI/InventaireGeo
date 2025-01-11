@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.example.inventairegeo"},{"l":"com.example.inventairegeo.activities"},{"l":"com.example.inventairegeo.adapters"},{"l":"com.example.inventairegeo.database"},{"l":"com.example.inventairegeo.models"},{"l":"com.example.inventairegeo.utils"}];updateSearchResults();
