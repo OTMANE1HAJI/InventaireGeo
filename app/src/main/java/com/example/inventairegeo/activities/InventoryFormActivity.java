@@ -13,7 +13,9 @@ import com.example.inventairegeo.R;
 import com.example.inventairegeo.database.DatabaseHelper;
 import com.example.inventairegeo.models.InventoryItem;
 
+// Cette classe gère l'ajout d'un nouvel article à l'inventaire
 public class InventoryFormActivity extends AppCompatActivity {
+    // Déclaration des éléments de l'interface utilisateur et des variables
     private EditText etName, etDescription;
     private Spinner spinnerCategory;
     private DatabaseHelper dbHelper;
@@ -26,14 +28,16 @@ public class InventoryFormActivity extends AppCompatActivity {
         setContentView(R.layout.activity_inventory_form);
 
         try {
+            // Initialisation de l'aide à la base de données
             dbHelper = new DatabaseHelper(this);
 
+            // Liaison des éléments UI avec leurs identifiants
             etName = findViewById(R.id.et_name);
             etDescription = findViewById(R.id.et_description);
             spinnerCategory = findViewById(R.id.spinner_category);
             Button btnSave = findViewById(R.id.btn_save);
 
-            // Configuration du spinner de catégories
+            // Configuration de l'adaptateur pour le spinner des catégories
             ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                     this,
                     R.array.categories,
@@ -42,11 +46,12 @@ public class InventoryFormActivity extends AppCompatActivity {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerCategory.setAdapter(adapter);
 
-            // Récupérer les données de l'intent
+            // Récupération des données de géolocalisation et du code-barres
             barcode = getIntent().getStringExtra("barcode");
             latitude = getIntent().getDoubleExtra("latitude", 0);
             longitude = getIntent().getDoubleExtra("longitude", 0);
 
+            // Configuration du bouton de sauvegarde
             btnSave.setOnClickListener(v -> saveInventoryItem());
 
         } catch (Exception e) {
@@ -55,28 +60,31 @@ public class InventoryFormActivity extends AppCompatActivity {
         }
     }
 
+    // Méthode pour sauvegarder un nouvel article dans l'inventaire
     private void saveInventoryItem() {
         try {
-            // Vérification des champs requis
+            // Validation du champ nom
             if (etName.getText().toString().trim().isEmpty()) {
                 etName.setError("Le nom est requis");
                 return;
             }
 
+            // Récupération des valeurs saisies
             String name = etName.getText().toString().trim();
             String description = etDescription.getText().toString().trim();
             String category = spinnerCategory.getSelectedItem().toString();
 
-            // Créer un nouvel item avec la catégorie au lieu de la quantité
+            // Création d'un nouvel article
             InventoryItem item = new InventoryItem(
                     barcode,
                     name,
                     description,
-                    category, // Catégorie à la place de la quantité
+                    category,
                     latitude,
                     longitude
             );
 
+            // Sauvegarde dans la base de données
             dbHelper.addInventoryItem(item);
             Toast.makeText(this, "Article enregistré avec succès", Toast.LENGTH_SHORT).show();
             finish();
