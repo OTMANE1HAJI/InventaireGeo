@@ -13,23 +13,28 @@ import com.example.inventairegeo.models.InventoryItem;
 import java.util.ArrayList;
 import java.util.List;
 
+// Classe helper pour gérer la base de données SQLite
 public class DatabaseHelper extends SQLiteOpenHelper {
+    // Constantes de la base de données
     private static final String DATABASE_NAME = "InventoryDB";
-    private static final int DATABASE_VERSION = 2; // Incrémenté pour la migration
+    private static final int DATABASE_VERSION = 2; // Version pour la migration
 
+    // Noms des tables et colonnes
     private static final String TABLE_INVENTORY = "inventory";
     private static final String COL_ID = "id";
     private static final String COL_BARCODE = "barcode";
     private static final String COL_NAME = "name";
     private static final String COL_DESCRIPTION = "description";
-    private static final String COL_CATEGORY = "category"; // Nouveau
+    private static final String COL_CATEGORY = "category";
     private static final String COL_LATITUDE = "latitude";
     private static final String COL_LONGITUDE = "longitude";
 
+    // Constructeur
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    // Création de la table lors de la première installation
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_TABLE = "CREATE TABLE " + TABLE_INVENTORY + "("
@@ -44,25 +49,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE);
     }
 
+    // Mise à jour de la base de données lors d'un changement de version
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
-            // Sauvegarde des données
+            // Sauvegarde des anciennes données
             List<InventoryItem> oldItems = getAllItemsFromOldDB(db);
 
-            // Supprime l'ancienne table
+            // Recréation de la table avec le nouveau schéma
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_INVENTORY);
-
-            // Crée la nouvelle table
             onCreate(db);
 
-            // Restaure les données
+            // Restauration des données avec la nouvelle structure
             for (InventoryItem item : oldItems) {
                 ContentValues values = new ContentValues();
                 values.put(COL_BARCODE, item.getBarcode());
                 values.put(COL_NAME, item.getName());
                 values.put(COL_DESCRIPTION, item.getDescription());
-                values.put(COL_CATEGORY, "Autre"); // Valeur par défaut pour les anciens items
+                values.put(COL_CATEGORY, "Autre"); 
                 values.put(COL_LATITUDE, item.getLatitude());
                 values.put(COL_LONGITUDE, item.getLongitude());
                 db.insert(TABLE_INVENTORY, null, values);
@@ -70,6 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // Récupère l'index d'une colonne de manière sécurisée
     private int getColumnIndexSafely(Cursor cursor, String columnName) {
         int index = cursor.getColumnIndex(columnName);
         if (index == -1) {
@@ -78,7 +83,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return index;
     }
 
-
+    // Récupère tous les éléments de l'ancienne version de la DB
     private List<InventoryItem> getAllItemsFromOldDB(SQLiteDatabase db) {
         List<InventoryItem> items = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_INVENTORY;
@@ -88,12 +93,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.rawQuery(selectQuery, null);
             if (cursor != null && cursor.moveToFirst()) {
                 do {
+                    // Récupération sécurisée des indices des colonnes
                     int barcodeIndex = getColumnIndexSafely(cursor, COL_BARCODE);
                     int nameIndex = getColumnIndexSafely(cursor, COL_NAME);
                     int descriptionIndex = getColumnIndexSafely(cursor, COL_DESCRIPTION);
                     int latitudeIndex = getColumnIndexSafely(cursor, COL_LATITUDE);
                     int longitudeIndex = getColumnIndexSafely(cursor, COL_LONGITUDE);
 
+                    // Récupération des valeurs avec gestion des erreurs
                     String barcode = barcodeIndex != -1 ? cursor.getString(barcodeIndex) : null;
                     String name = nameIndex != -1 ? cursor.getString(nameIndex) : null;
                     String description = descriptionIndex != -1 ? cursor.getString(descriptionIndex) : null;
@@ -113,11 +120,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return items;
     }
 
-
+    // Ajoute un nouvel article dans la base de données
     public void addInventoryItem(InventoryItem item) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        // Préparation des valeurs à insérer
         values.put(COL_BARCODE, item.getBarcode());
         values.put(COL_NAME, item.getName());
         values.put(COL_DESCRIPTION, item.getDescription());
@@ -129,6 +137,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // Récupère tous les articles de la base de données
     public List<InventoryItem> getAllItems() {
         List<InventoryItem> items = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_INVENTORY;
@@ -140,6 +149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             if (cursor != null && cursor.moveToFirst()) {
                 do {
+                    // Récupération sécurisée des indices et valeurs
                     int idIndex = getColumnIndexSafely(cursor, COL_ID);
                     int barcodeIndex = getColumnIndexSafely(cursor, COL_BARCODE);
                     int nameIndex = getColumnIndexSafely(cursor, COL_NAME);
@@ -148,6 +158,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     int latitudeIndex = getColumnIndexSafely(cursor, COL_LATITUDE);
                     int longitudeIndex = getColumnIndexSafely(cursor, COL_LONGITUDE);
 
+                    // Création de l'objet InventoryItem avec les valeurs récupérées
                     String barcode = barcodeIndex != -1 ? cursor.getString(barcodeIndex) : null;
                     String name = nameIndex != -1 ? cursor.getString(nameIndex) : null;
                     String description = descriptionIndex != -1 ? cursor.getString(descriptionIndex) : null;
@@ -173,14 +184,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return items;
     }
 
+    // Met à jour un article existant
     public boolean updateItem(InventoryItem item) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        // Mise à jour des valeurs modifiables
         values.put(COL_NAME, item.getName());
         values.put(COL_DESCRIPTION, item.getDescription());
         values.put(COL_CATEGORY, item.getCategory());
 
+        // Exécution de la mise à jour
         int result = db.update(TABLE_INVENTORY,
                 values,
                 "id = ?",
@@ -189,6 +203,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result > 0;
     }
 
+    // Supprime un article de la base de données
     public boolean deleteItem(int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
         int result = db.delete(TABLE_INVENTORY, COL_ID + " = ?", new String[]{String.valueOf(itemId)});
