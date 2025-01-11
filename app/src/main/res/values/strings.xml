@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">InventaireGeo</string>
+    <string-array name="categories">
+        <item>Fourniture</item>
+        <item>Cosmétique</item>
+        <item>Films</item>
+        <item>Menus</item>
+        <item>Autre</item>
+    </string-array>
+</resources>
